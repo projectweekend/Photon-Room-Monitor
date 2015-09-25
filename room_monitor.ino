@@ -6,12 +6,16 @@ bool occupied = FALSE;
 String roomName = "room-1";
 
 
+void sendRoomStatus(String roomStatus, String roomName) {
+  Spark.publish(roomStatus, roomName, 60, PRIVATE);
+}
+
+
 void statusHandler(const char *event, const char *data) {
-  int reading = digitalRead(pir);
-  if (reading == HIGH) {
-    Spark.publish("occupied", roomName, 60, PRIVATE);
+  if (occupied) {
+    sendRoomStatus("occupied", roomName);
   } else {
-    Spark.publish("empty", roomName, 60, PRIVATE);
+    sendRoomStatus("empty", roomName);
   }
 }
 
@@ -38,14 +42,14 @@ void loop() {
     if (!occupied) {
       occupied = TRUE;
       Serial.println("State change: Send room occupied notification");
-      Spark.publish("occupied", roomName, 60, PRIVATE);
+      sendRoomStatus("occupied", roomName);
     }
   } else {
     Serial.println("No motion");
     if (occupied) {
       occupied = FALSE;
       Serial.println("State change: Send room empty notification");
-      Spark.publish("empty", roomName, 60, PRIVATE);
+      sendRoomStatus("empty", roomName);
     }
   }
 
